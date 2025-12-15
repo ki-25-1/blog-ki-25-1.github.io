@@ -100,6 +100,32 @@
     background: var(--secondary);
 }
 
+        /* Стиль для іменинника сьогодні */
+.birthday-today {
+    background: linear-gradient(135deg, #1f2937 0%, #312e81 100%); /* Градієнт */
+    border: 2px solid #fbbf24; /* Золота рамка */
+    box-shadow: 0 0 15px rgba(251, 191, 36, 0.5); /* Світіння */
+    transform: scale(1.02); /* Трішки збільшена */
+    animation: pulse 2s infinite;
+}
+
+/* Анімація пульсації */
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(251, 191, 36, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+}
+
+/* Додатковий значок */
+.birthday-badge {
+    background-color: #fbbf24;
+    color: #111827;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-left: 10px;
+}
         /* Навігація */
         nav {
             background: rgba(31, 41, 55, 0.95);
@@ -352,33 +378,51 @@
     const REPO_URL = 'posts/'; // Папка, де лежать JSON файли
 // --- Функція завантаження іменинників ---
     async function loadBirthdays() {
-        const listContainer = document.getElementById('birthdays-list');
+    const listContainer = document.getElementById('birthdays-list');
+    
+    try {
+        const response = await fetch('data/birthdays.json');
+        if (!response.ok) throw new Error('Списку не знайдено');
         
-        try {
-            // Читаємо файл з папки data
-            const response = await fetch('data/birthdays.json');
-            if (!response.ok) throw new Error('Списку не знайдено');
-            
-            const students = await response.json();
-            
-            listContainer.innerHTML = ''; // Очищаємо напис "Завантаження..."
+        const students = await response.json();
+        
+        // --- ЛОГІКА ВИЗНАЧЕННЯ ДАТИ ---
+        const now = new Date();
+        const day = now.getDate(); // Наприклад: 16
+        // Масив місяців у родовому відмінку (як у json)
+        const months = ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня', 'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня'];
+        const monthName = months[now.getMonth()]; // Наприклад: "грудня"
+        
+        // Формуємо рядки для пошуку (щоб знайти і "16 грудня", і "01 січня")
+        const todayString = `${day} ${monthName}`; // "16 грудня"
+        const todayStringZero = `${day < 10 ? '0' + day : day} ${monthName}`; // "05 січня" (якщо в базі з нулем)
 
-            students.forEach(student => {
-                // Створюємо HTML для кожного студента
-                const html = `
-                <li class="birthday-item">
-                    <span>${student.name}</span>
-                    <strong>${student.date}</strong>
-                </li>
-                `;
-                listContainer.innerHTML += html;
-            });
-            
-        } catch (error) {
-            console.error(error);
-            listContainer.innerHTML = '<p style="text-align: center; color: red;">Не вдалося завантажити список.</p>';
-        }
+        listContainer.innerHTML = ''; 
+
+        students.forEach(student => {
+            // Перевіряємо, чи дата студента співпадає з сьогоднішньою
+            // (приводимо все до нижнього регістру для надійності)
+            const isBirthdayToday = student.date.toLowerCase().includes(todayString) || 
+                                    student.date.toLowerCase().includes(todayStringZero);
+
+            // Якщо сьогодні — додаємо клас .birthday-today і значок
+            const activeClass = isBirthdayToday ? 'birthday-today' : '';
+            const badge = isBirthdayToday ? '<span class="birthday-badge">Сьогодні! 🎉</span>' : '';
+
+            const html = `
+            <li class="birthday-item ${activeClass}">
+                <span>${student.name} ${badge}</span>
+                <strong>${student.date}</strong>
+            </li>
+            `;
+            listContainer.innerHTML += html;
+        });
+        
+    } catch (error) {
+        console.error(error);
+        listContainer.innerHTML = '<p style="text-align: center; color: red;">Не вдалося завантажити список.</p>';
     }
+}
     // 1. Завантаження списку новин
     async function loadNews() {
         const newsContainer = document.querySelector('.news-grid');
@@ -466,6 +510,7 @@
     // Запуск
     window.onload = function() {
         loadNews(); // Завантажуємо новини
+        loadBirthdays();
         
         // Ефект друку (з твого попереднього коду)
         const textToType = "КІ-25-1: Блог майбутніх інженерів";
@@ -487,6 +532,7 @@
 </body>
 
 </html>
+
 
 
 
