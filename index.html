@@ -375,54 +375,118 @@
     </main>
 
     <script>
-        // --- JavaScript Логіка ---
+    // --- Основні налаштування ---
+    const REPO_URL = 'posts/'; // Папка, де лежать JSON файли
 
-        // 1. Функція перемикання вкладок
-        function openTab(tabName) {
-            // Ховаємо всі вкладки
-            const contents = document.querySelectorAll('.tab-content');
-            contents.forEach(content => content.classList.remove('active'));
+    // 1. Завантаження списку новин
+    async function loadNews() {
+        const newsContainer = document.querySelector('.news-grid');
+        // Якщо контейнера немає (наприклад, ми на іншій вкладці), нічого не робимо
+        if(!newsContainer) return;
 
-            // Прибираємо активний клас з усіх кнопок
-            const buttons = document.querySelectorAll('.nav-btn');
-            buttons.forEach(btn => btn.classList.remove('active'));
+        newsContainer.innerHTML = '<p style="text-align:center;">Завантаження новин...</p>';
 
-            // Показуємо потрібну вкладку
-            document.getElementById(tabName).classList.add('active');
-            
-            // Підсвічуємо натиснуту кнопку (знаходимо її через event або перебором, тут спрощено)
-            const activeBtn = document.querySelector(`button[onclick="openTab('${tabName}')"]`);
-            if(activeBtn) activeBtn.classList.add('active');
+        try {
+            // Спочатку читаємо список файлів (list.json)
+            const response = await fetch(REPO_URL + 'list.json');
+            if (!response.ok) throw new Error('Не знайдено список новин');
+            const files = await response.json();
+
+            newsContainer.innerHTML = ''; // Очищаємо
+
+            // Проходимо по кожному файлу зі списку
+            for (const file of files) {
+                const postRes = await fetch(REPO_URL + file);
+                const post = await postRes.json();
+
+                // Створюємо картку
+                // Зверни увагу: я додав кнопку onclick="openModal(...)"
+                const html = `
+                <article class="card">
+                    <img src="${post.image}" alt="${post.title}">
+                    <div class="card-content">
+                        <span class="card-date">${post.date}</span>
+                        <h3>${post.title}</h3>
+                        <p>${post.shortText}</p>
+                        <button class="read-more-btn" onclick='openModal(${JSON.stringify(post)})'>
+                            Читати далі
+                        </button>
+                    </div>
+                </article>
+                `;
+                newsContainer.innerHTML += html;
+            }
+        } catch (error) {
+            console.error(error);
+            newsContainer.innerHTML = '<p style="text-align:center; color: red;">Помилка завантаження новин. Перевірте папку posts.</p>';
         }
+    }
 
-        // 2. Ефект набору тексту (Typewriter Effect)
+    // 2. Логіка Модального вікна (Повний екран)
+    const modal = document.getElementById("newsModal");
+
+    // Функція відкриття (отримує об'єкт поста)
+    function openModal(post) {
+        document.getElementById("modalTitle").innerText = post.title;
+        document.getElementById("modalDate").innerText = post.date;
+        document.getElementById("modalImage").src = post.image;
+        
+        // Вставляємо повний текст (підтримує HTML теги всередині JSON)
+        document.getElementById("modalText").innerHTML = post.fullText;
+        
+        modal.style.display = "block";
+        document.body.style.overflow = "hidden"; // Блокуємо прокрутку основного сайту
+    }
+
+    // Функція закриття
+    function closeModal() {
+        modal.style.display = "none";
+        document.body.style.overflow = "auto"; // Повертаємо прокрутку
+    }
+
+    // Закриття при кліку поза вікном
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+
+    // --- Стандартні функції (Таби, Ефекти) ---
+    function openTab(tabName) {
+        const contents = document.querySelectorAll('.tab-content');
+        contents.forEach(content => content.classList.remove('active'));
+        const buttons = document.querySelectorAll('.nav-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        const activeBtn = document.querySelector(`button[onclick="openTab('${tabName}')"]`);
+        if(activeBtn) activeBtn.classList.add('active');
+    }
+
+    // Запуск
+    window.onload = function() {
+        loadNews(); // Завантажуємо новини
+        
+        // Ефект друку (з твого попереднього коду)
         const textToType = "КІ-25-1: Блог майбутніх інженерів";
         const typeContainer = document.querySelector('.typing-text');
-        let charIndex = 0;
-
-        function typeWriter() {
-            if (charIndex < textToType.length) {
-                typeContainer.textContent += textToType.charAt(charIndex);
-                charIndex++;
-                setTimeout(typeWriter, 100); // Швидкість друку (100мс)
+        if(typeContainer) {
+            let charIndex = 0;
+            function typeWriter() {
+                if (charIndex < textToType.length) {
+                    typeContainer.textContent += textToType.charAt(charIndex);
+                    charIndex++;
+                    setTimeout(typeWriter, 100);
+                }
             }
+            typeContainer.textContent = "";
+            typeWriter();
         }
-
-        // Запускаємо ефект друку, коли завантажиться сторінка
-        window.onload = function() {
-            // Очистимо текст перед початком (про всяк випадок)
-            if(typeContainer) {
-                typeContainer.textContent = ""; 
-                typeWriter();
-            }
-        };
-
-        // 3. Додатковий ефект: Привітання в консолі
-        console.log("%cВітаємо на сайті КІ-25-1!", "color: #4f46e5; font-size: 20px; font-weight: bold;");
-    </script>
+    };
+</script>
 </body>
 
 </html>
+
 
 
 
