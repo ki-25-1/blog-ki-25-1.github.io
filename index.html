@@ -336,57 +336,7 @@
 
         // 3. Додатковий ефект: Привітання в консолі
         console.log("%cВітаємо на сайті КІ-25-1!", "color: #4f46e5; font-size: 20px; font-weight: bold;");
-    </script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyDcikZy_aZRsW-IuiSN5JaUex8IdBmbFkU",
-    authDomain: "blog-ki-25-1.firebaseapp.com",
-    projectId: "blog-ki-25-1",
-    storageBucket: "blog-ki-25-1.firebasestorage.app",
-    messagingSenderId: "50991138200",
-    appId: "1:50991138200:web:07c4e47e6442b0933f17ed",
-    measurementId: "G-EP7Q9GDJSY"
-  };
-
-  // Ініціалізація
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  // --- Функція завантаження новин ---
-  async function loadNews() {
-      const newsContainer = document.querySelector('.news-grid');
-      newsContainer.innerHTML = '<p>Завантаження новин...</p>'; // Показуємо, поки вантажить
-      
-      const querySnapshot = await getDocs(collection(db, "news"));
-      
-      let html = '';
-      querySnapshot.forEach((doc) => {
-          const post = doc.data();
-          // Генеруємо HTML картку для кожної новини з бази
-          html += `
-            <article class="card">
-                <img src="${post.imageUrl}" alt="${post.title}">
-                <div class="card-content">
-                    <span class="card-date">${post.date}</span>
-                    <h3>${post.title}</h3>
-                    <p>${post.description}</p>
-                </div>
-            </article>
-          `;
-      });
-      
-      newsContainer.innerHTML = html;
-  }
-
-  // Завантажити новини при старті
-  loadNews();
-</script>
+    
 </body>
+
 </html>
