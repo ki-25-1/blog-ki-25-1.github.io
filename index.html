@@ -139,6 +139,47 @@
 .card:hover .gallery-video {
     /* Можна додати ефекти, якщо треба */
 }
+        /* --- Стилі для перегляду фото/відео на весь екран --- */
+.gallery-content {
+    background: transparent; /* Без білого фону */
+    border: none;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    margin: 0 auto;
+    pointer-events: none; /* Щоб кліки проходили крізь пусті місця */
+}
+
+/* Контейнер для медіа, щоб клікати по ньому (пауза/зум) */
+#galleryMediaContainer {
+    pointer-events: auto; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 80vh; /* Максимальна висота */
+}
+
+/* Стиль для великої картинки/відео */
+#galleryMediaContainer img, 
+#galleryMediaContainer video {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Зберігаємо пропорції */
+    border-radius: 8px;
+    box-shadow: 0 0 50px rgba(0,0,0,0.8);
+}
+
+#galleryModalCaption {
+    color: white;
+    margin-top: 15px;
+    font-size: 1.2rem;
+    text-shadow: 0 2px 4px black;
+    pointer-events: auto;
+}
         /* Навігація */
         nav {
             background: rgba(31, 41, 55, 0.95);
@@ -388,6 +429,7 @@
     // --- Основні налаштування ---
     const REPO_URL = 'posts/'; // Папка, де лежать JSON файли
     // --- Функція завантаження Галереї (Фото та Відео) ---
+    // --- Оновлена функція завантаження Галереї ---
     async function loadGallery() {
         const galleryContainer = document.getElementById('gallery-grid');
         
@@ -397,28 +439,29 @@
             
             const items = await response.json();
             
-            galleryContainer.innerHTML = ''; // Очищаємо
+            galleryContainer.innerHTML = ''; 
 
             items.forEach(item => {
-                let mediaHtml = '';
+                let mediaPreview = '';
 
-                // Перевіряємо тип файлу
+                // Показуємо прев'ю (відео теж як картинку або плеєр без контролів)
                 if (item.type === 'video') {
-                    // controls - показує кнопку Play/Pause
-                    mediaHtml = `
-                        <video class="gallery-video" controls>
+                    // muted і preload, щоб виглядало як прев'ю
+                    mediaPreview = `
+                        <video class="gallery-video" muted preload="metadata">
                             <source src="${item.src}" type="video/mp4">
-                            Ваш браузер не підтримує відео.
                         </video>
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3rem; color: white; opacity: 0.8;">▶</div>
                     `;
                 } else {
-                    // Звичайне фото
-                    mediaHtml = `<img src="${item.src}" alt="${item.caption}">`;
+                    mediaPreview = `<img src="${item.src}" alt="${item.caption}">`;
                 }
 
+                // Додаємо onclick="openGalleryModal(...)"
+                // JSON.stringify(item).replace(/"/g, '&quot;') - щоб коректно передати об'єкт з лапками
                 const html = `
-                <div class="card">
-                    ${mediaHtml}
+                <div class="card" onclick='openGalleryModal(${JSON.stringify(item)})' style="cursor: pointer; position: relative;">
+                    ${mediaPreview}
                     <div class="card-content" style="padding: 10px;">
                         <p style="font-size: 0.9rem; color: var(--text-gray); text-align: center;">
                             ${item.caption}
@@ -433,6 +476,42 @@
             console.error(error);
             galleryContainer.innerHTML = '<p style="text-align: center; color: red;">Помилка завантаження галереї.</p>';
         }
+    }
+
+    // --- Функції для відкриття на весь екран ---
+    function openGalleryModal(item) {
+        const modal = document.getElementById('galleryModal');
+        const container = document.getElementById('galleryMediaContainer');
+        const caption = document.getElementById('galleryModalCaption');
+
+        // Очищаємо попереднє
+        container.innerHTML = '';
+
+        if (item.type === 'video') {
+            // Створюємо відеоплеєр (автоплей + звук)
+            container.innerHTML = `
+                <video controls autoplay style="max-width: 100%; max-height: 100%;">
+                    <source src="${item.src}" type="video/mp4">
+                    Ваш браузер не підтримує відео.
+                </video>
+            `;
+        } else {
+            // Створюємо картинку
+            container.innerHTML = `<img src="${item.src}" alt="${item.caption}">`;
+        }
+
+        caption.innerText = item.caption;
+        modal.style.display = "block"; // Використовуємо той самий клас modal, що й для новин
+        document.body.style.overflow = "hidden"; // Блокуємо скрол сайту
+    }
+
+    function closeGalleryModal() {
+        const modal = document.getElementById('galleryModal');
+        const container = document.getElementById('galleryMediaContainer');
+        
+        modal.style.display = "none";
+        container.innerHTML = ''; // Важливо! Зупиняє відео, видаляючи його з DOM
+        document.body.style.overflow = "auto";
     }
 // --- Функція завантаження іменинників (Топ-5 найближчих) ---
     async function loadBirthdays() {
@@ -621,9 +700,17 @@
         }
     };
 </script>
+    <div id="galleryModal" class="modal" onclick="closeGalleryModal()">
+    <span class="close-btn">&times;</span>
+    <div class="modal-content gallery-content" onclick="event.stopPropagation()">
+        <div id="galleryMediaContainer"></div>
+        <p id="galleryModalCaption"></p>
+    </div>
+</div>
 </body>
 
 </html>
+
 
 
 
