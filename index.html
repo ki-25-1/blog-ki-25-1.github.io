@@ -270,6 +270,17 @@
     </style>
 </head>
 <body>
+    <div id="newsModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <img id="modalImage" class="modal-img" src="" alt="">
+        <div class="modal-body">
+            <h2 id="modalTitle" style="margin-bottom: 1rem; color: var(--primary);"></h2>
+            <span id="modalDate" style="color: var(--text-gray); display: block; margin-bottom: 1rem;"></span>
+            <div id="modalText"></div>
+        </div>
+    </div>
+</div>
 
     <nav>
         <div class="logo">KI-25-1</div>
@@ -412,5 +423,6 @@
 </body>
 
 </html>
+
 
 
