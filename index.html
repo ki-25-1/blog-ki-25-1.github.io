@@ -126,6 +126,19 @@
     font-weight: bold;
     margin-left: 10px;
 }
+        /* Стилі для відео в галереї */
+.gallery-video {
+    width: 100%;
+    height: 200px; /* Така ж висота як у фото */
+    object-fit: cover; /* Заповнює блок */
+    background: black;
+    cursor: pointer;
+}
+
+/* Коли наводимо на відео - показуємо контролери */
+.card:hover .gallery-video {
+    /* Можна додати ефекти, якщо треба */
+}
         /* Навігація */
         nav {
             background: rgba(31, 41, 55, 0.95);
@@ -347,13 +360,11 @@
         </section>
 
         <section id="photos" class="tab-content">
-            <h1>Галерея моментів</h1>
-            <div class="photo-grid">
-                <div class="card"><img src="https://via.placeholder.com/400x300?text=Пара+в+аудиторії" alt="Фото"></div>
-                <div class="card"><img src="https://via.placeholder.com/400x300?text=Екскурсія" alt="Фото"></div>
-                <div class="card"><img src="https://via.placeholder.com/400x300?text=Відпочинок" alt="Фото"></div>
-            </div>
-        </section>
+    <h1>Галерея моментів 📸</h1>
+    <div id="gallery-grid" class="photo-grid">
+        <p style="text-align: center; color: var(--text-gray);">Завантаження галереї...</p>
+    </div>
+</section>
 
         <section id="birthdays" class="tab-content">
     <h1>Іменинники 🎂</h1>
@@ -376,6 +387,53 @@
     <script>
     // --- Основні налаштування ---
     const REPO_URL = 'posts/'; // Папка, де лежать JSON файли
+    // --- Функція завантаження Галереї (Фото та Відео) ---
+    async function loadGallery() {
+        const galleryContainer = document.getElementById('gallery-grid');
+        
+        try {
+            const response = await fetch('data/gallery.json');
+            if (!response.ok) throw new Error('Галерею не знайдено');
+            
+            const items = await response.json();
+            
+            galleryContainer.innerHTML = ''; // Очищаємо
+
+            items.forEach(item => {
+                let mediaHtml = '';
+
+                // Перевіряємо тип файлу
+                if (item.type === 'video') {
+                    // controls - показує кнопку Play/Pause
+                    mediaHtml = `
+                        <video class="gallery-video" controls>
+                            <source src="${item.src}" type="video/mp4">
+                            Ваш браузер не підтримує відео.
+                        </video>
+                    `;
+                } else {
+                    // Звичайне фото
+                    mediaHtml = `<img src="${item.src}" alt="${item.caption}">`;
+                }
+
+                const html = `
+                <div class="card">
+                    ${mediaHtml}
+                    <div class="card-content" style="padding: 10px;">
+                        <p style="font-size: 0.9rem; color: var(--text-gray); text-align: center;">
+                            ${item.caption}
+                        </p>
+                    </div>
+                </div>
+                `;
+                galleryContainer.innerHTML += html;
+            });
+            
+        } catch (error) {
+            console.error(error);
+            galleryContainer.innerHTML = '<p style="text-align: center; color: red;">Помилка завантаження галереї.</p>';
+        }
+    }
 // --- Функція завантаження іменинників ---
     async function loadBirthdays() {
     const listContainer = document.getElementById('birthdays-list');
@@ -511,6 +569,7 @@
     window.onload = function() {
         loadNews(); // Завантажуємо новини
         loadBirthdays();
+        loadGallery();
         
         // Ефект друку (з твого попереднього коду)
         const textToType = "КІ-25-1: Блог майбутніх інженерів";
@@ -532,6 +591,7 @@
 </body>
 
 </html>
+
 
 
 
