@@ -1,0 +1,17 @@
+[
+  {
+    "type": "image",
+    "src": "media/studia.jpg",
+    "caption": "Наша першая пара"
+  },
+  {
+    "type": "video",
+    "src": "media/video1.mp4",
+    "caption": "Приколи на перерві"
+  },
+  {
+    "type": "image",
+    "src": "media/photo2.jpg",
+    "caption": "Екскурсія"
+  }
+]
