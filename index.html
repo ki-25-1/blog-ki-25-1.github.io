@@ -434,53 +434,86 @@
             galleryContainer.innerHTML = '<p style="text-align: center; color: red;">Помилка завантаження галереї.</p>';
         }
     }
-// --- Функція завантаження іменинників ---
+// --- Функція завантаження іменинників (Топ-5 найближчих) ---
     async function loadBirthdays() {
-    const listContainer = document.getElementById('birthdays-list');
-    
-    try {
-        const response = await fetch('data/birthdays.json');
-        if (!response.ok) throw new Error('Списку не знайдено');
+        const listContainer = document.getElementById('birthdays-list');
         
-        const students = await response.json();
-        
-        // --- ЛОГІКА ВИЗНАЧЕННЯ ДАТИ ---
-        const now = new Date();
-        const day = now.getDate(); // Наприклад: 16
-        // Масив місяців у родовому відмінку (як у json)
-        const months = ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня', 'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня'];
-        const monthName = months[now.getMonth()]; // Наприклад: "грудня"
-        
-        // Формуємо рядки для пошуку (щоб знайти і "16 грудня", і "01 січня")
-        const todayString = `${day} ${monthName}`; // "16 грудня"
-        const todayStringZero = `${day < 10 ? '0' + day : day} ${monthName}`; // "05 січня" (якщо в базі з нулем)
+        try {
+            const response = await fetch('data/birthdays.json');
+            if (!response.ok) throw new Error('Списку не знайдено');
+            
+            let students = await response.json();
+            
+            // 1. Словник для перекладу місяців у цифри (0-11)
+            const monthMap = {
+                'січня': 0, 'лютого': 1, 'березня': 2, 'квітня': 3, 'травня': 4, 'червня': 5,
+                'липня': 6, 'серпня': 7, 'вересня': 8, 'жовтня': 9, 'листопада': 10, 'грудня': 11
+            };
 
-        listContainer.innerHTML = ''; 
+            const now = new Date();
+            // Скидаємо час в 00:00:00, щоб порівнювати тільки дати
+            now.setHours(0, 0, 0, 0); 
+            const currentYear = now.getFullYear();
 
-        students.forEach(student => {
-            // Перевіряємо, чи дата студента співпадає з сьогоднішньою
-            // (приводимо все до нижнього регістру для надійності)
-            const isBirthdayToday = student.date.toLowerCase().includes(todayString) || 
-                                    student.date.toLowerCase().includes(todayStringZero);
+            // 2. Обчислюємо дату наступного дня народження для кожного
+            students.forEach(student => {
+                const parts = student.date.split(' '); // "12 грудня" -> ["12", "грудня"]
+                const day = parseInt(parts[0]);
+                const monthName = parts[1].toLowerCase();
+                const monthIndex = monthMap[monthName];
 
-            // Якщо сьогодні — додаємо клас .birthday-today і значок
-            const activeClass = isBirthdayToday ? 'birthday-today' : '';
-            const badge = isBirthdayToday ? '<span class="birthday-badge">Сьогодні! 🎉</span>' : '';
+                // Створюємо дату дня народження в цьому році
+                let nextBirthday = new Date(currentYear, monthIndex, day);
 
-            const html = `
-            <li class="birthday-item ${activeClass}">
-                <span>${student.name} ${badge}</span>
-                <strong>${student.date}</strong>
-            </li>
-            `;
-            listContainer.innerHTML += html;
-        });
-        
-    } catch (error) {
-        console.error(error);
-        listContainer.innerHTML = '<p style="text-align: center; color: red;">Не вдалося завантажити список.</p>';
+                // Якщо день народження вже пройшов у цьому році — наступний буде в наступному році
+                if (nextBirthday < now) {
+                    nextBirthday.setFullYear(currentYear + 1);
+                }
+                
+                // Зберігаємо обчислену дату прямо в об'єкт студента, щоб потім сортувати
+                student.nextDateObj = nextBirthday;
+            });
+
+            // 3. Сортуємо список: від найближчої дати до найдальшої
+            students.sort((a, b) => a.nextDateObj - b.nextDateObj);
+
+            // 4. Беремо тільки перші 5 осіб
+            const top5 = students.slice(0, 5);
+
+            // 5. Виводимо на екран
+            listContainer.innerHTML = ''; 
+
+            // (Це для перевірки "сьогоднішнього" дня з попереднього кроку)
+            const todayDay = now.getDate();
+            const todayMonth = now.getMonth();
+
+            if (top5.length === 0) {
+                listContainer.innerHTML = '<p style="text-align: center;">Список пустий</p>';
+                return;
+            }
+
+            top5.forEach(student => {
+                // Перевірка, чи це сьогодні (порівнюємо об'єкти дат)
+                const isToday = student.nextDateObj.getDate() === todayDay && 
+                                student.nextDateObj.getMonth() === todayMonth;
+
+                const activeClass = isToday ? 'birthday-today' : '';
+                const badge = isToday ? '<span class="birthday-badge">Сьогодні! 🎉</span>' : '';
+
+                const html = `
+                <li class="birthday-item ${activeClass}">
+                    <span>${student.name} ${badge}</span>
+                    <strong>${student.date}</strong>
+                </li>
+                `;
+                listContainer.innerHTML += html;
+            });
+            
+        } catch (error) {
+            console.error(error);
+            listContainer.innerHTML = '<p style="text-align: center; color: red;">Не вдалося завантажити список.</p>';
+        }
     }
-}
     // 1. Завантаження списку новин
     async function loadNews() {
         const newsContainer = document.querySelector('.news-grid');
@@ -591,6 +624,7 @@
 </body>
 
 </html>
+
 
 
 
