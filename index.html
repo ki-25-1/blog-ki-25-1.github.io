@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Блог Групи КІ-25-1</title>
+    <style>
+        /* --- CSS Стилі --- */
+        :root {
+            --primary: #4f46e5;
+            --secondary: #ec4899;
+            --bg-dark: #111827;
+            --bg-card: #1f2937;
+            --text-light: #f3f4f6;
+            --text-gray: #9ca3af;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            overflow-x: hidden;
+        }
+
+        /* Навігація */
+        nav {
+            background: rgba(31, 41, 55, 0.95);
+            padding: 1rem 2rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #374151;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-gray);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            color: white;
+            background-color: var(--primary);
+            box-shadow: 0 0 15px rgba(79, 70, 229, 0.5);
+        }
+
+        /* Головний контейнер */
+        main {
+            padding: 100px 2rem 2rem; /* відступ зверху для фіксованого меню */
+            max-width: 1200px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        /* Секції */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        /* Стилі для Новин (Grid) */
+        .news-grid, .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #374151;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            border-color: var(--primary);
+        }
+
+        .card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .card-date {
+            color: var(--secondary);
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* Стилі для Іменинників */
+        .birthdays-list {
+            list-style: none;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .birthday-item {
+            background: var(--bg-card);
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--secondary);
+        }
+
+        /* Стилі для Розкладу (Iframe) */
+        .schedule-container {
+            width: 100%;
+            height: 80vh;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid var(--primary);
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Ефект друку тексту */
+        .typing-effect {
+            border-right: 3px solid var(--secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            display: inline-block;
+            animation: blink 0.75s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+
+        /* Адаптивність */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none; /* Для спрощення, в реальному проекті треба бургер-меню */
+            }
+            nav { justify-content: center; flex-direction: column; gap: 10px;}
+            .nav-links { display: flex; flex-wrap: wrap; justify-content: center; font-size: 0.8rem;}
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">KI-25-1</div>
+        <ul class="nav-links">
+            <li><button class="nav-btn active" onclick="openTab('news')">Новини</button></li>
+            <li><button class="nav-btn" onclick="openTab('achievements')">Досягнення</button></li>
+            <li><button class="nav-btn" onclick="openTab('photos')">Наші фото</button></li>
+            <li><button class="nav-btn" onclick="openTab('birthdays')">Іменинники</button></li>
+            <li><button class="nav-btn" onclick="openTab('schedule')">Розклад</button></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="news" class="tab-content active">
+            <h1><span class="typing-text">Останні новини групи</span><span class="typing-effect"></span></h1>
+            
+            <div class="news-grid">
+                <article class="card">
+                    <img src="https://via.placeholder.com/400x200/4f46e5/ffffff?text=Перша+сесія" alt="Сесія">
+                    <div class="card-content">
+                        <span class="card-date">15.12.2025</span>
+                        <h3>Підготовка до першої сесії</h3>
+                        <p>Всі матеріали для підготовки до іспиту з дискретної математики вже в телеграмі.</p>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <img src="https://via.placeholder.com/400x200/ec4899/ffffff?text=День+Студента" alt="Свято">
+                    <div class="card-content">
+                        <span class="card-date">17.11.2025</span>
+                        <h3>Як ми святкували День Студента</h3>
+                        <p>Фотозвіт з вечірки та походу в боулінг.</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section id="achievements" class="tab-content">
+            <h1>Наші перемоги</h1>
+            <div class="news-grid">
+                <div class="card">
+                    <div class="card-content">
+                        <h3>🏆 Хакатон 2025</h3>
+                        <p>Команда нашої групи зайняла 2 місце у університетському хакатоні!</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-content">
+                        <h3>📜 Курсова з програмування</h3>
+                        <p>10 студентів здали курсову на "відмінно" автоматом.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="photos" class="tab-content">
+            <h1>Галерея моментів</h1>
+            <div class="photo-grid">
+                <div class="card"><img src="https://via.placeholder.com/400x300?text=Пара+в+аудиторії" alt="Фото"></div>
+                <div class="card"><img src="https://via.placeholder.com/400x300?text=Екскурсія" alt="Фото"></div>
+                <div class="card"><img src="https://via.placeholder.com/400x300?text=Відпочинок" alt="Фото"></div>
+            </div>
+        </section>
+
+        <section id="birthdays" class="tab-content">
+            <h1>Іменинники цього місяця 🎂</h1>
+            <ul class="birthdays-list">
+                <li class="birthday-item">
+                    <span>Олександр Петренко</span>
+                    <strong>12 грудня</strong>
+                </li>
+                <li class="birthday-item">
+                    <span>Марія Коваль</span>
+                    <strong>25 грудня</strong>
+                </li>
+                <li class="birthday-item">
+                    <span>Іван Сидоренко</span>
+                    <strong>28 грудня</strong>
+                </li>
+            </ul>
+        </section>
+
+        <section id="schedule" class="tab-content">
+            <h1>Актуальний розклад</h1>
+            <p style="text-align: center; margin-bottom: 1rem; color: var(--text-gray);">
+                Завантажено з офіційного сайту університету
+            </p>
+            <div class="schedule-container">
+                <iframe src="https://dekanat.nung.edu.ua/cgi-bin/timetable.cgi?n=700" title="Розклад занять"></iframe>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // --- JavaScript Логіка ---
+
+        // 1. Функція перемикання вкладок
+        function openTab(tabName) {
+            // Ховаємо всі вкладки
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            // Прибираємо активний клас з усіх кнопок
+            const buttons = document.querySelectorAll('.nav-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Показуємо потрібну вкладку
+            document.getElementById(tabName).classList.add('active');
+            
+            // Підсвічуємо натиснуту кнопку (знаходимо її через event або перебором, тут спрощено)
+            const activeBtn = document.querySelector(`button[onclick="openTab('${tabName}')"]`);
+            if(activeBtn) activeBtn.classList.add('active');
+        }
+
+        // 2. Ефект набору тексту (Typewriter Effect)
+        const textToType = "КІ-25-1: Блог майбутніх інженерів";
+        const typeContainer = document.querySelector('.typing-text');
+        let charIndex = 0;
+
+        function typeWriter() {
+            if (charIndex < textToType.length) {
+                typeContainer.textContent += textToType.charAt(charIndex);
+                charIndex++;
+                setTimeout(typeWriter, 100); // Швидкість друку (100мс)
+            }
+        }
+
+        // Запускаємо ефект друку, коли завантажиться сторінка
+        window.onload = function() {
+            // Очистимо текст перед початком (про всяк випадок)
+            if(typeContainer) {
+                typeContainer.textContent = ""; 
+                typeWriter();
+            }
+        };
+
+        // 3. Додатковий ефект: Привітання в консолі
+        console.log("%cВітаємо на сайті КІ-25-1!", "color: #4f46e5; font-size: 20px; font-weight: bold;");
+    </script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyDcikZy_aZRsW-IuiSN5JaUex8IdBmbFkU",
+    authDomain: "blog-ki-25-1.firebaseapp.com",
+    projectId: "blog-ki-25-1",
+    storageBucket: "blog-ki-25-1.firebasestorage.app",
+    messagingSenderId: "50991138200",
+    appId: "1:50991138200:web:07c4e47e6442b0933f17ed",
+    measurementId: "G-EP7Q9GDJSY"
+  };
+
+  // Ініціалізація
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // --- Функція завантаження новин ---
+  async function loadNews() {
+      const newsContainer = document.querySelector('.news-grid');
+      newsContainer.innerHTML = '<p>Завантаження новин...</p>'; // Показуємо, поки вантажить
+      
+      const querySnapshot = await getDocs(collection(db, "news"));
+      
+      let html = '';
+      querySnapshot.forEach((doc) => {
+          const post = doc.data();
+          // Генеруємо HTML картку для кожної новини з бази
+          html += `
+            <article class="card">
+                <img src="${post.imageUrl}" alt="${post.title}">
+                <div class="card-content">
+                    <span class="card-date">${post.date}</span>
+                    <h3>${post.title}</h3>
+                    <p>${post.description}</p>
+                </div>
+            </article>
+          `;
+      });
+      
+      newsContainer.innerHTML = html;
+  }
+
+  // Завантажити новини при старті
+  loadNews();
+</script>
+</body>
+</html>
