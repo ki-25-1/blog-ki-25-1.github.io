@@ -350,7 +350,35 @@
     <script>
     // --- Основні налаштування ---
     const REPO_URL = 'posts/'; // Папка, де лежать JSON файли
+// --- Функція завантаження іменинників ---
+    async function loadBirthdays() {
+        const listContainer = document.getElementById('birthdays-list');
+        
+        try {
+            // Читаємо файл з папки data
+            const response = await fetch('data/birthdays.json');
+            if (!response.ok) throw new Error('Списку не знайдено');
+            
+            const students = await response.json();
+            
+            listContainer.innerHTML = ''; // Очищаємо напис "Завантаження..."
 
+            students.forEach(student => {
+                // Створюємо HTML для кожного студента
+                const html = `
+                <li class="birthday-item">
+                    <span>${student.name}</span>
+                    <strong>${student.date}</strong>
+                </li>
+                `;
+                listContainer.innerHTML += html;
+            });
+            
+        } catch (error) {
+            console.error(error);
+            listContainer.innerHTML = '<p style="text-align: center; color: red;">Не вдалося завантажити список.</p>';
+        }
+    }
     // 1. Завантаження списку новин
     async function loadNews() {
         const newsContainer = document.querySelector('.news-grid');
@@ -459,6 +487,7 @@
 </body>
 
 </html>
+
 
 
 
