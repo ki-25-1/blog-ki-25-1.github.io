@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Блог Групи КІ-25-1</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <style>
         /* --- CSS Стилі --- */
         :root {
@@ -27,6 +29,46 @@
             color: var(--text-light);
             overflow-x: hidden;
         }
+        /* --- Стилі для Слайдера в новинах --- */
+.swiper {
+    width: 100%;
+    height: 400px; /* Висота слайдера */
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.swiper-slide {
+    text-align: center;
+    font-size: 18px;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Картинка всередині слайда */
+.swiper-slide img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* або contain, якщо не хочеш обрізати */
+}
+
+/* Відео всередині слайда */
+.swiper-slide video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Колір стрілочок і точок навігації */
+.swiper-button-next, .swiper-button-prev {
+    color: var(--primary);
+    text-shadow: 0 0 5px black;
+}
+.swiper-pagination-bullet-active {
+    background: var(--primary);
+}
         /* --- Стилі для Модального вікна (Повний екран) --- */
 .modal {
     display: none; /* Приховано за замовчуванням */
@@ -527,13 +569,24 @@
                 </div>
             </div>
         </section>
-        <section id="news" class="tab-content">
-            <h1><span class="typing-text">Останні новини групи</span><span class="typing-effect"></span></h1>
-            
-            <div class="news-grid">
-                
-            </div>
-        </section>
+        <div id="newsModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        
+        <div class="swiper mySwiper">
+            <div class="swiper-wrapper" id="modalSliderWrapper">
+                </div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-pagination"></div>
+        </div>
+        <div class="modal-body">
+            <h2 id="modalTitle" style="margin-bottom: 1rem; color: var(--primary);"></h2>
+            <span id="modalDate" style="color: var(--text-gray); display: block; margin-bottom: 1rem;"></span>
+            <div id="modalText"></div>
+        </div>
+    </div>
+</div>
 
         <section id="achievements" class="tab-content">
     <h1>Наші перемоги 🏆</h1>
@@ -829,29 +882,86 @@
     // 2. Логіка Модального вікна (Повний екран)
     const modal = document.getElementById("newsModal");
 
-    // Функція відкриття (отримує об'єкт поста)
+    // --- ОНОВЛЕНА: Функція відкриття Новини (зі слайдером) ---
+    let swiper_instance = null; // Змінна для зберігання слайдера
+
     function openModal(post) {
+        const modal = document.getElementById("newsModal");
+        const sliderWrapper = document.getElementById("modalSliderWrapper");
+        
+        // 1. Заповнюємо текст
         document.getElementById("modalTitle").innerText = post.title;
         document.getElementById("modalDate").innerText = post.date;
-        document.getElementById("modalImage").src = post.image;
-        
-        // Вставляємо повний текст (підтримує HTML теги всередині JSON)
         document.getElementById("modalText").innerHTML = post.fullText;
         
+        // 2. Очищаємо старі слайди
+        sliderWrapper.innerHTML = '';
+
+        // 3. Перевіряємо, що у нас є: одна картинка (старий формат) чи список медіа (новий)
+        let mediaList = [];
+        if (post.media && Array.isArray(post.media)) {
+            mediaList = post.media; // Новий формат
+        } else if (post.image) {
+            mediaList = [{ type: 'image', src: post.image }]; // Старий формат (для сумісності)
+        }
+
+        // 4. Створюємо слайди
+        mediaList.forEach(item => {
+            let slideContent = '';
+            if (item.type === 'video') {
+                // Відео (з controls, щоб можна було керувати)
+                slideContent = `<video controls><source src="${item.src}" type="video/mp4"></video>`;
+            } else {
+                // Картинка
+                slideContent = `<img src="${item.src}" alt="Фото">`;
+            }
+            // Додаємо в обгортку слайда
+            sliderWrapper.innerHTML += `<div class="swiper-slide">${slideContent}</div>`;
+        });
+
+        // 5. Показуємо вікно
         modal.style.display = "block";
-        document.body.style.overflow = "hidden"; // Блокуємо прокрутку основного сайту
+        document.body.style.overflow = "hidden";
+
+        // 6. Ініціалізуємо (запускаємо) Swiper
+        // Якщо слайдер вже був створений раніше - знищуємо його перед створенням нового
+        if (swiper_instance) {
+            swiper_instance.destroy(true, true);
+        }
+        
+        swiper_instance = new Swiper(".mySwiper", {
+            navigation: {
+                nextEl: ".swiper-button-next",
+                prevEl: ".swiper-button-prev",
+            },
+            pagination: {
+                el: ".swiper-pagination",
+                clickable: true,
+            },
+            grabCursor: true, // Курсор-рука
+            spaceBetween: 30, // Відступ між слайдами
+            // Якщо тільки 1 слайд - ховаємо стрілки
+            watchOverflow: true, 
+            on: {
+                // Коли слайдер закривається/знищується - ставимо на паузу всі відео
+                destroy: function () {
+                   const videos = document.querySelectorAll('.swiper-slide video');
+                   videos.forEach(v => v.pause());
+                }
+            }
+        });
     }
 
     // Функція закриття
     function closeModal() {
+        const modal = document.getElementById("newsModal");
         modal.style.display = "none";
-        document.body.style.overflow = "auto"; // Повертаємо прокрутку
-    }
-
-    // Закриття при кліку поза вікном
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            closeModal();
+        document.body.style.overflow = "auto";
+        
+        // Знищуємо слайдер при закритті, щоб зупинити відео і очистити пам'ять
+        if (swiper_instance) {
+            swiper_instance.destroy(true, true);
+            swiper_instance = null;
         }
     }
 
@@ -900,6 +1010,7 @@
 </body>
 
 </html>
+
 
 
 
