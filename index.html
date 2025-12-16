@@ -532,7 +532,14 @@
     <div id="newsModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeModal()">&times;</span>
-        <img id="modalImage" class="modal-img" src="" alt="">
+        
+        <div class="swiper mySwiper">
+            <div class="swiper-wrapper" id="modalSliderWrapper">
+                </div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-pagination"></div>
+        </div>
         <div class="modal-body">
             <h2 id="modalTitle" style="margin-bottom: 1rem; color: var(--primary);"></h2>
             <span id="modalDate" style="color: var(--text-gray); display: block; margin-bottom: 1rem;"></span>
@@ -569,26 +576,13 @@
                 </div>
             </div>
         </section>
-        <section>
-        <div id="newsModal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn" onclick="closeModal()">&times;</span>
-        
-        <div class="swiper mySwiper">
-            <div class="swiper-wrapper" id="modalSliderWrapper">
-                </div>
-            <div class="swiper-button-next"></div>
-            <div class="swiper-button-prev"></div>
-            <div class="swiper-pagination"></div>
-        </div>
-        <div class="modal-body">
-            <h2 id="modalTitle" style="margin-bottom: 1rem; color: var(--primary);"></h2>
-            <span id="modalDate" style="color: var(--text-gray); display: block; margin-bottom: 1rem;"></span>
-            <div id="modalText"></div>
-        </div>
-    </div>
-</div>
-</section>
+        <section id="news" class="tab-content">
+            <h1><span class="typing-text">Останні новини групи</span><span class="typing-effect"></span></h1>
+            
+            <div class="news-grid">
+                
+            </div>
+        </section>
         <section id="achievements" class="tab-content">
     <h1>Наші перемоги 🏆</h1>
     <div id="achievements-list" class="achievements-grid">
@@ -1011,6 +1005,7 @@
 </body>
 
 </html>
+
 
 
 
