@@ -310,6 +310,76 @@
             align-items: center;
             border-left: 4px solid var(--secondary);
         }
+        /* --- Стилі для Головної сторінки --- */
+        .hero-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 2rem;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .hero-image-wrapper {
+            width: 100%;
+            max-width: 1000px; /* Ширина фото */
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(79, 70, 229, 0.3); /* Тінь під колір групи */
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .hero-img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .hero-image-wrapper:hover .hero-img {
+            transform: scale(1.02); /* Легке збільшення при наведенні */
+        }
+
+        .hero-text h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #4f46e5, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
+        .motto-box {
+            font-size: 1.5rem;
+            line-height: 1.6;
+            color: var(--text-light);
+            background: rgba(31, 41, 55, 0.6);
+            padding: 20px 40px;
+            border-radius: 15px;
+            border-left: 5px solid var(--secondary);
+            backdrop-filter: blur(5px);
+        }
+
+        .motto-line {
+            display: block;
+            font-style: italic;
+        }
+
+        .motto-line.highlight {
+            color: var(--secondary); /* Рожевий акцент */
+            font-weight: bold;
+            font-style: normal;
+            margin-top: 5px;
+        }
+
+        /* Адаптивність для телефонів */
+        @media (max-width: 768px) {
+            .hero-text h1 { font-size: 2.5rem; }
+            .motto-box { font-size: 1.1rem; padding: 15px; }
+        }
 
         /* Стилі для Розкладу (Iframe) */
         .schedule-container {
@@ -365,7 +435,8 @@
     <nav>
         <div class="logo">KI-25-1</div>
         <ul class="nav-links">
-            <li><button class="nav-btn active" onclick="openTab('news')">Новини</button></li>
+            <li><button class="nav-btn active" onclick="openTab('home')">Головна</button></li>
+            <li><button class="nav-btn" onclick="openTab('news')">Новини</button></li>
             <li><button class="nav-btn" onclick="openTab('achievements')">Досягнення</button></li>
             <li><button class="nav-btn" onclick="openTab('photos')">Наші фото</button></li>
             <li><button class="nav-btn" onclick="openTab('birthdays')">Іменинники</button></li>
@@ -374,7 +445,22 @@
     </nav>
 
     <main>
-        <section id="news" class="tab-content active">
+        <section id="home" class="tab-content active">
+            <div class="hero-container">
+                <div class="hero-image-wrapper">
+                    <img src="media/group-main.jpg" alt="Група КІ-25-1" class="hero-img">
+                </div>
+                
+                <div class="hero-text">
+                    <h1>КІ-25-1</h1>
+                    <div class="motto-box">
+                        <p class="motto-line">І залізо, і софт під силу мені —</p>
+                        <p class="motto-line highlight">Студент КІ всюди на висоті!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="news" class="tab-content">
             <h1><span class="typing-text">Останні новини групи</span><span class="typing-effect"></span></h1>
             
             <div class="news-grid">
@@ -710,6 +796,7 @@
 </body>
 
 </html>
+
 
 
 
