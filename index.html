@@ -292,6 +292,73 @@
             margin-bottom: 0.5rem;
             display: block;
         }
+        /* --- Стилі для Досягнень --- */
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.achievement-card {
+    background: var(--bg-card);
+    border-radius: 15px;
+    padding: 1.5rem;
+    position: relative;
+    border: 1px solid #374151;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Кольорова смужка зліва в залежності від категорії (додається JS-ом) */
+.achievement-card.cat-it { border-left: 5px solid #6366f1; }   /* Indigo */
+.achievement-card.cat-study { border-left: 5px solid #22c55e; } /* Green */
+.achievement-card.cat-sport { border-left: 5px solid #f59e0b; } /* Amber */
+.achievement-card.cat-art { border-left: 5px solid #ec4899; }   /* Pink */
+
+.achievement-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.ach-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 1rem;
+}
+
+.ach-icon {
+    font-size: 3rem;
+    background: rgba(255, 255, 255, 0.05);
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.ach-info h3 {
+    font-size: 1.3rem;
+    margin-bottom: 5px;
+    color: var(--text-light);
+}
+
+.ach-date {
+    font-size: 0.85rem;
+    color: var(--text-gray);
+    display: block;
+}
+
+.ach-desc {
+    color: #d1d5db;
+    line-height: 1.6;
+}
 
         /* Стилі для Іменинників */
         .birthdays-list {
@@ -469,22 +536,11 @@
         </section>
 
         <section id="achievements" class="tab-content">
-            <h1>Наші перемоги</h1>
-            <div class="news-grid">
-                <div class="card">
-                    <div class="card-content">
-                        <h3>🏆 Хакатон 2025</h3>
-                        <p>Команда нашої групи зайняла 2 місце у університетському хакатоні!</p>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-content">
-                        <h3>📜 Курсова з програмування</h3>
-                        <p>10 студентів здали курсову на "відмінно" автоматом.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+    <h1>Наші перемоги 🏆</h1>
+    <div id="achievements-list" class="achievements-grid">
+        <p style="text-align: center; color: var(--text-gray);">Завантаження досягнень...</p>
+    </div>
+</section>
 
         <section id="photos" class="tab-content">
     <h1>Галерея моментів 📸</h1>
@@ -691,6 +747,41 @@
             listContainer.innerHTML = '<p style="text-align: center; color: red;">Помилка даних.</p>';
         }
     }
+        // --- Функція завантаження Досягнень ---
+    async function loadAchievements() {
+        const container = document.getElementById('achievements-list');
+        
+        try {
+            const response = await fetch('data/achievements.json');
+            if (!response.ok) throw new Error('Файл не знайдено');
+            
+            const items = await response.json();
+            container.innerHTML = '';
+
+            items.forEach(item => {
+                // Визначаємо клас для кольору (якщо категорії немає - буде звичайний)
+                const categoryClass = item.category ? `cat-${item.category}` : '';
+
+                const html = `
+                <div class="achievement-card ${categoryClass}">
+                    <div class="ach-header">
+                        <div class="ach-icon">${item.icon}</div>
+                        <div class="ach-info">
+                            <h3>${item.title}</h3>
+                            <span class="ach-date">📅 ${item.date}</span>
+                        </div>
+                    </div>
+                    <p class="ach-desc">${item.description}</p>
+                </div>
+                `;
+                container.innerHTML += html;
+            });
+            
+        } catch (error) {
+            console.error(error);
+            container.innerHTML = '<p style="text-align: center; color: red;">Помилка завантаження досягнень.</p>';
+        }
+    }
     // 1. Завантаження списку новин
     async function loadNews() {
         const newsContainer = document.querySelector('.news-grid');
@@ -780,6 +871,7 @@
         loadNews(); // Завантажуємо новини
         loadBirthdays();
         loadGallery();
+        loadAchievements();
         
         // Ефект друку (з твого попереднього коду)
         const textToType = "КІ-25-1: Блог майбутніх інженерів";
@@ -808,6 +900,7 @@
 </body>
 
 </html>
+
 
 
 
