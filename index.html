@@ -422,11 +422,14 @@
         /* --- Стилі для Головної сторінки --- */
         .hero-container {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
-            justify-content: center;
-            text-align: center;
-            gap: 2rem;
+            justify-content: space-between;
+            text-align: left;
+            gap: 4rem; /* Відступ між фото і текстом */
+            max-width: 1200px; /* Обмеження ширини всього блоку, щоб не роз'їжджалось на великих екранах */
+            margin: 0 auto; /* Центрування самого контейнера */
+            padding: 0 20px; /* Відступи від країв екрану */
             animation: fadeIn 1s ease-in-out;
         }
 
@@ -452,13 +455,7 @@
         }
 
         .hero-text h1 {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(to right, #4f46e5, #ec4899);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 900;
-            letter-spacing: 2px;
+            flex: 1;
         }
 
         .motto-box {
@@ -526,6 +523,16 @@
             nav { justify-content: center; flex-direction: column; gap: 10px;}
             .nav-links { display: flex; flex-wrap: wrap; justify-content: center; font-size: 0.8rem;}
         }
+        @media (max-width: 768px) {
+    .hero-container {
+        flex-direction: column; /* На телефоні знову в стовпчик */
+        text-align: center;     /* На телефоні текст по центру */
+    }
+    
+    .hero-text h1 {
+        font-size: 2.5rem; /* Трішки менший шрифт для телефонів */
+    }
+}
     </style>
 </head>
 <body>
@@ -1005,6 +1012,7 @@
 </body>
 
 </html>
+
 
 
 
