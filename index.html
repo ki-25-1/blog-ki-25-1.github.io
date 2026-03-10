@@ -762,6 +762,17 @@
                 
                 student.nextDateObj = nextBirthday;
                 student.isValid = true;
+                // Розрахунок віку (додати після student.isValid = true;)
+                if (student.year) {
+                const birthYear = student.year;
+                let age = currentYear - birthYear;
+                // Якщо день народження ще не настав цього року — відніміємо 1
+                const birthdayThisYear = new Date(currentYear, monthIndex, day);
+                if (birthdayThisYear > now) age--;
+                student.age = age;
+                } else {
+                    student.age = null;
+                }
             });
 
             // Фільтруємо, лишаємо тільки валідних
@@ -791,7 +802,7 @@
                 const html = `
                 <li class="birthday-item ${activeClass}">
                     <span>${student.name} ${badge}</span>
-                    <strong>${student.date}</strong>
+                    <strong>${student.date}${student.age !== null ? ` (${student.age} р.)` : ''}</strong>
                 </li>
                 `;
                 listContainer.innerHTML += html;
@@ -1012,30 +1023,3 @@
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
